@@ -4,21 +4,22 @@ import matplotlib.pyplot as plt
 pi = np.pi
 
 def lissague_data(a, b, delta):
-    t = np.linspace(0, 2 * pi / min(a, b), 1000)
-    x = np.cos(a * t)
-    y = np.sin(b * t + delta)
-    return x, y
+    t = np.linspace(0, 2*pi, 50000, endpoint=False)
+    x = np.sin(a * t + delta)
+    y = np.sin(b * t)
+    points = np.transpose(np.array((x, y)))
+    points = np.unique(points, axis=0)
+    return points
 
 def lissague_draw(ax, x, y):
-    ax.plot(x, y, '-')
+    ax.scatter(x, y, s=1)
 
-fig, (ax1, ax2) = plt.subplots(2, 1)
-fig.suptitle('A tale of 2 subplots')
+fig, (ax) = plt.subplots(1, 1)
+fig.suptitle('Lissague')
 
-x1, y1 = lissague_data(2, 1, pi/4)
-x2, y2 = lissague_data(4, 2, pi/3)
+points = lissague_data(9, 8, pi/4)
 
-lissague_draw(ax1, x1, y1)
-lissague_draw(ax2, x2, y2)
+lissague_draw(ax, points[:,0], points[:,1])
+
 
 plt.show()

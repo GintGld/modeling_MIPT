@@ -27,10 +27,11 @@ class lissague:
         Class that involve all information about lissague 
         figure with given parameters (A, B, Delta, N).
     '''
-    def __init__(self, A, B, Delta, N, cv):
+    def __init__(self, A, B, Delta, N, cv, cv_hist):
         '''
             constructor
             cv - canvas for drawing figure
+            cv_hist - canvas for histogramm
             A, B, Delta - figure parameters
             N - amount of steps
             if A, B aren't big (<=7)  N >= 500
@@ -39,6 +40,7 @@ class lissague:
             int_t - pair of t values in intersection points.
         '''
         self.cv = cv
+        self.cv_hist = cv_hist
         self.cv.set_title('A='+str(A)+', B='+str(B)+', $\delta$='+str(round((Delta/pi), 2))+'$\pi$')
 
         self.t = np.linspace(0, 2 * pi, N)
@@ -73,22 +75,26 @@ class lissague:
             and intersection points.
             ax - given canvas
         '''
+        self.cv.set_xlim(-1.05,1.05)
+        self.cv.set_ylim(-1.05,1.05)
+        self.cv_hist.set_xlim(-1.05,1.05)
         self.cv.plot(self.points[:,0], self.points[:,1], '-')
-        self.cv.scatter(self.int_p[:,0], self.int_p[:,1], s=30, c='green', marker='o')
+        self.cv.scatter(self.int_p[:,0], self.int_p[:,1], s=30, c='black', marker='D')
+        self.cv_hist.hist(self.int_p[:,0], bins=101, histtype='step', align='mid'), 
 
 
-fig, ax = plt.subplots(2, 2)
+#plt.figure(figsize=(14, 16), dpi=80)
+fig, ax = plt.subplots(2, 3)
 fig.suptitle('Lissague')
+
 L = np.array([
-    lissague(7, 4, pi/9, 500, ax.flat[0]),
-    lissague(5, 3, pi/11, 500, ax.flat[1]),
-    lissague(3, 7, pi/3, 800, ax.flat[2]),
-    lissague(9, 8, pi/4, 700, ax.flat[3]),
+    lissague(5, 3, pi/11, 500, ax[0][0], ax[1][0]),
+    lissague(3, 7, pi/3, 800, ax[0][1], ax[1][1]),
+    lissague(9, 8, pi/4, 700, ax[0][2], ax[1][2]),
 ], dtype=lissague)
-
-
 for l in L: l.draw()
+
+
 
 fig.tight_layout()
 plt.show()
-plt.savefig('wk2/lissague_ex.jpg')

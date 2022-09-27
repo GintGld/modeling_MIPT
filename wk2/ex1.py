@@ -71,8 +71,9 @@ class lissague:
 
     def draw(self):
         '''
-            draws lissague figure 
-            and intersection points.
+            draws lissague figure,
+            intersection points and
+            hist.
             ax - given canvas
         '''
         self.cv.set_xlim(-1.05,1.05)

@@ -1,23 +1,30 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 pi = np.pi
 
-def lissague_data(a, b, delta):
-    t = np.linspace(0, 2*pi, 10000, endpoint=False)
-    x = np.sin(a * t + delta)
-    y = np.sin(b * t)
-    points = np.transpose(np.array((x, y)))
-    #points = np.unique(points, axis=0)
-    return points
+class lissague():
+    def __init__(self, A, B, Delta, N):
+        self.t = np.linspace(0, 2 * pi, N)
+        x = np.sin(A * self.t + Delta)
+        y = np.sin(B * self.t)
+        self.points = np.transpose(np.array((
+            np.sin(A * self.t + Delta), # x
+            np.sin(B * self.t),         # y
+            self.t)))                   # t
+        
 
-def lissague_draw(ax, x, y):
-    ax.plot(x, y, "-")
+    def draw_line(self, ax):
+        ax.plot(self.points[:,0], self.points[:,1], '-')
+    
+    def draw_scatter(self, ax):
+        ax.scatter(self.points[:,0], self.points[:,1], s=2)
 
 fig, (ax) = plt.subplots(1, 1)
 fig.suptitle('Lissague')
 
-points = lissague_data(5, 3, pi/6)
-lissague_draw(ax, points[:,0], points[:,1])
+l1 = lissague(5, 3, pi/11, 5000)
+l1.draw_scatter(ax)
 
 plt.show()

@@ -38,12 +38,12 @@ int main(int argc, char *argv[])
 {
     std::vector <double> y0 = {6400000, 0};
     unsigned N = 1000000;
-    double dx = 0.0005;
-    if (argc > 1) w = std::stof(argv[1]);
-    if (argc > 1) y0[0] = std::stof(argv[2]);
-    if (argc > 2) y0[1] = std::stof(argv[3]);
-    if (argc > 3) N = std::stoi(argv[4]);
-    if (argc > 4) dx = std::stoi(argv[5]);
+    double dx = 0.001;
+    if (argc > 1) w = std::stod(argv[1]);
+    if (argc > 2) y0[0] = std::stod(argv[2]);
+    if (argc > 3) y0[1] = std::stod(argv[3]);
+    if (argc > 4) N = std::stoi(argv[4]);
+    if (argc > 5) dx = std::stoi(argv[5]);
     std::string file = "fluct_" + 
         std::to_string(y0[0]) + '_' + 
         std::to_string(y0[1]) + '_' + 
@@ -60,8 +60,11 @@ int main(int argc, char *argv[])
     }
     std::cout << "modeling done.\n";
 
-    std::ofstream fout(file); fout << "e_x,e_v,h_x,h_v\n";
-    for (unsigned i = 0; i < data1.size(); ++i) fout << data1[i][0] << ',' << data1[i][1] << ',' << data2[i][0] << ',' << data2[i][1] << "\n";
+    std::ofstream fout(file); fout << "x_e,v_e,x_h,v_h,w,N,dx\n";
+    for (unsigned i = 0; i < data1.size(); ++i) fout << 
+        data1[i][0] << ',' << data1[i][1] << ',' << 
+        data2[i][0] << ',' << data2[i][1] << ',' <<
+        w << ',' << N << ',' << dx << "\n";
     fout.close();
     std::cout << "data saved.\n";
 

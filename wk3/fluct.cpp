@@ -37,18 +37,19 @@ std::vector <double> Heun(std::vector <double> y)
 int main(int argc, char *argv[])
 {
     std::vector <double> y0 = {6400000, 0};
-    unsigned N = 1000000;
-    double dx = 0.001;
+    int Len = 10000;
     if (argc > 1) w = std::stod(argv[1]);
     if (argc > 2) y0[0] = std::stod(argv[2]);
     if (argc > 3) y0[1] = std::stod(argv[3]);
-    if (argc > 4) N = std::stoi(argv[4]);
-    if (argc > 5) dx = std::stoi(argv[5]);
-    std::string file = "fluct_" + 
-        std::to_string(y0[0]) + '_' + 
-        std::to_string(y0[1]) + '_' + 
-        std::to_string(N) + '_' + 
-        std::to_string(dx) + ".txt";
+    if (argc > 4) Len = std::stoi(argv[4]);
+    if (argc > 5) dx = std::stod(argv[5]);
+    int N = static_cast<int>(static_cast<double>(Len)/dx);
+
+    std::string file = "C:/Users/coolg/modeling/wk3/data2/fluct_" + 
+        std::to_string(static_cast<int>(y0[0])) + '_' + 
+        std::to_string(static_cast<int>(y0[1])) + '_' + 
+        std::to_string(Len) + '_' + 
+        std::to_string(dx).substr(0, std::min(std::to_string(dx).find_last_not_of('0'), std::to_string(dx).find_last_not_of('.'))+1) + ".txt";
 
     std::vector < std::vector <double> > data1, data2;
     data1.push_back(y0); data2.push_back(y0);
@@ -60,11 +61,11 @@ int main(int argc, char *argv[])
     }
     std::cout << "modeling done.\n";
 
-    std::ofstream fout(file); fout << "x_e,v_e,x_h,v_h,w,N,dx\n";
+    std::ofstream fout(file); fout << "x_e,v_e,x_h,v_h,w,L,dx\n";
     for (unsigned i = 0; i < data1.size(); ++i) fout << 
         data1[i][0] << ',' << data1[i][1] << ',' << 
         data2[i][0] << ',' << data2[i][1] << ',' <<
-        w << ',' << N << ',' << dx << "\n";
+        w << ',' << Len << ',' << dx << "\n";
     fout.close();
     std::cout << "data saved.\n";
 

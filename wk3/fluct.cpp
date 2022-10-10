@@ -51,15 +51,15 @@ std::vector <double> rk45(std::vector <double> y)
 
     k2[0] = y[0] + 0.5 * dx * k1[0];  
     k2[1] = y[1] + 0.5 * dx * k1[1];
-    k2 = f(k2, k2[0]);
+    k2 = f(k2, y[0] + 0.5 * dx);
 
     k3[0] = y[0] + 0.5 * dx * k2[0];  
     k3[1] = y[1] + 0.5 * dx * k2[1];
-    k3 = f(k3, k3[0]);
+    k3 = f(k3, y[0] + 0.5 * dx);
     
     k4[0] = y[0] + dx * k3[0];
     k4[1] = y[1] + dx * k3[1];
-    k4 = f(k4, k4[0]);
+    k4 = f(k4, y[0] + dx);
 
     return std::vector <double> {
         y[0] + dx * (k1[0] + 2*k2[0] + 2*k3[0] + k4[0]) / 6,

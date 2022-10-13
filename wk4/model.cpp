@@ -59,11 +59,6 @@ class Solver
     public:
         Solver(double w, double x0, double v0, double L, double h, const std::string model): w(w), x0(x0), v0(v0), L(L), h(h), model(model)
         {
-            //this->w = std::stod(w);
-            //this->x0 = std::stod(x0);
-            //this->v0 = std::stod(v0);
-            //this->L = std::stod(L);
-            //this->h = std::stod(h);
             data.push_back(state {this->x0, this->v0, this->w});
             this->N = (int)(this->L / this->h);
         };
@@ -93,7 +88,7 @@ class Solver
                 std::to_string(static_cast<int>(this->x0)) + '_' + 
                 std::to_string(static_cast<int>(this->v0)) + '_' + 
                 std::to_string(static_cast<int>(this->L)) + '_' + 
-                std::to_string(this->h).substr(0, 8/*std::to_string(this->h).find_last_not_of('0')+1*/) + ".txt";
+                std::to_string(this->h).substr(0, 8) + ".txt";
             std::cout << "collecting files\n";
             std::ofstream out(file);
             out << "x,v,w,L,h\n";
@@ -139,8 +134,6 @@ int main()
             it.value()["model"]
         });
     }
-
-    //for (unsigned i = 0; i < Solvers.size(); ++i) 
 
     for (unsigned i = 0; i < Solvers.size(); ++i) {Solvers[i].print(); Solvers[i].solve();}
     for (unsigned i = 0; i < Solvers.size(); ++i) Solvers[i].write();

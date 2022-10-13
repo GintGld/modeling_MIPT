@@ -73,7 +73,7 @@ class Solver
             {
                 (*this).add_step();
             }
-            std::cout << "Solved successfully\n\n";
+            std::cout << "status: solved successfully\n\n";
         }
         void print()
         {
@@ -93,7 +93,7 @@ class Solver
                 std::to_string(static_cast<int>(this->x0)) + '_' + 
                 std::to_string(static_cast<int>(this->v0)) + '_' + 
                 std::to_string(static_cast<int>(this->L)) + '_' + 
-                std::to_string(this->h).substr(0, std::to_string(this->h).find_last_not_of('0')+1) + ".txt";
+                std::to_string(this->h).substr(0, 8/*std::to_string(this->h).find_last_not_of('0')+1*/) + ".txt";
             std::cout << "collecting files\n";
             std::ofstream out(file);
             out << "x,v,w,L,h\n";
@@ -140,11 +140,12 @@ int main()
         });
     }
 
-    for (unsigned i = 0; i < Solvers.size(); ++i) Solvers[i].print();
+    //for (unsigned i = 0; i < Solvers.size(); ++i) 
 
-    for (unsigned i = 0; i < Solvers.size(); ++i) Solvers[i].solve();
-
+    for (unsigned i = 0; i < Solvers.size(); ++i) {Solvers[i].print(); Solvers[i].solve();}
     for (unsigned i = 0; i < Solvers.size(); ++i) Solvers[i].write();
+    
+    std::cout << "end of modeling";
 
     return 0;
 }

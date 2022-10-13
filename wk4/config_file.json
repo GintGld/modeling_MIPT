@@ -1,0 +1,52 @@
+{
+    "entries": [
+        {
+            "model": "Euler",
+            "omega": 2,
+            "initial coordinate": 6400000,
+            "initial velocity": 0,
+            "modeling interspace": 5.0,
+            "step of modeling": 0.05
+        },
+        {
+            "model": "Euler",
+            "omega": 2,
+            "initial coordinate": 6400000,
+            "initial velocity": 0,
+            "modeling interspace": 25.0,
+            "step of modeling": 0.01
+        },
+        {
+            "model": "Heun",
+            "omega": 2,
+            "initial coordinate": 6400000,
+            "initial velocity": 0,
+            "modeling interspace": 24.999999999999996,
+            "step of modeling": 0.05
+        },
+        {
+            "model": "Heun",
+            "omega": 2,
+            "initial coordinate": 6400000,
+            "initial velocity": 0,
+            "modeling interspace": 625.0,
+            "step of modeling": 0.01
+        },
+        {
+            "model": "RK45",
+            "omega": 2,
+            "initial coordinate": 6400000,
+            "initial velocity": 0,
+            "modeling interspace": 624.9999999999999,
+            "step of modeling": 0.05
+        },
+        {
+            "model": "RK45",
+            "omega": 2,
+            "initial coordinate": 6400000,
+            "initial velocity": 0,
+            "modeling interspace": 390624.99999999994,
+            "step of modeling": 0.01
+        }
+    ]
+}

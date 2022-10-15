@@ -33,7 +33,7 @@ class Solver
         std::vector <state> data;
         double w, x0, v0, L, h;
         int N;
-        const std::string model;
+        const std::string model, file;
         void add_step()
         {
             state y = this->data[data.size()-1];
@@ -57,7 +57,8 @@ class Solver
             }
         }
     public:
-        Solver(double w, double x0, double v0, double L, double h, const std::string model): w(w), x0(x0), v0(v0), L(L), h(h), model(model)
+        Solver(double w, double x0, double v0, double L, double h, const std::string model, const std::string file): 
+            w(w), x0(x0), v0(v0), L(L), h(h), model(model), file(file)
         {
             data.push_back(state {this->x0, this->v0, this->w});
             this->N = (int)(this->L / this->h);
@@ -67,6 +68,16 @@ class Solver
             for (unsigned i = 0; i < this->N; ++i)
             {
                 (*this).add_step();
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.1)-1) std::cout << "10\% solved\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.2)-1) std::cout << "20\% solved\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.3)-1) std::cout << "30\% solved\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.4)-1) std::cout << "40\% solved\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.5)-1) std::cout << "50\% solved\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.6)-1) std::cout << "60\% solved\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.7)-1) std::cout << "70\% solved\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.8)-1) std::cout << "80\% solved\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.9)-1) std::cout << "90\% solved\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*1)-1) std::cout << "100\% solved\n";
             }
             std::cout << "status: solved successfully\n\n";
         }
@@ -82,15 +93,8 @@ class Solver
         }
         void write()
         {
-            std::string file = "data/" +
-                this->model + '_' + 
-                std::to_string(static_cast<int>(this->w)) + '_' +
-                std::to_string(static_cast<int>(this->x0)) + '_' + 
-                std::to_string(static_cast<int>(this->v0)) + '_' + 
-                std::to_string(static_cast<int>(this->L)) + '_' + 
-                std::to_string(this->h).substr(0, 8) + ".txt";
             std::cout << "collecting files\n";
-            std::ofstream out(file);
+            std::ofstream out(this->file);
             out << "x,v,w,L,h\n";
             for (unsigned i = 0; i < this->N; ++i)
             {
@@ -101,7 +105,8 @@ class Solver
                     this->L << ',' <<
                     this->h << "\n";
             }
-            std::cout << "data has been written to " + file << std::endl << std::endl;
+            out.close();
+            std::cout << "data has been written to " + this->file << std::endl << std::endl;
         }
         void clear()
         {
@@ -123,18 +128,19 @@ int main()
     std::cout << "Entries number: " << config["entries"].size() << std::endl << std::endl;
 
 
-    for (json::iterator it = config["entries"].begin(); it != config["entries"].end(); ++it)
+    for (unsigned i = 0; i < config["entries"].size(); ++i)
     { // w(w), x0(x0), v0(v0), h(h), L(L), model(model)
         Solvers.push_back( Solver {
-            it.value()["omega"],
-            it.value()["initial coordinate"],
-            it.value()["initial velocity"],
-            it.value()["modeling interspace"],
-            it.value()["step of modeling"],
-            it.value()["model"]
+            config["entries"][i]["omega"],
+            config["entries"][i]["initial coordinate"],
+            config["entries"][i]["initial velocity"],
+            config["entries"][i]["modeling interspace"],
+            config["entries"][i]["step of modeling"],
+            config["entries"][i]["model"],
+            config["file names"][i]["name"]
         });
     }
-
+    
     for (unsigned i = 0; i < Solvers.size(); ++i) {Solvers[i].print(); Solvers[i].solve();}
     for (unsigned i = 0; i < Solvers.size(); ++i) Solvers[i].write();
     

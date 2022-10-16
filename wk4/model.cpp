@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cmath> // log()
 #include"C:\src\json\single_include\nlohmann\json.hpp"
 
 using json = nlohmann::json;
@@ -77,7 +78,7 @@ class Solver
                 if (i == static_cast<int>(static_cast<double>(this->N)*0.7)-1) std::cout << "70\% solved\n";
                 if (i == static_cast<int>(static_cast<double>(this->N)*0.8)-1) std::cout << "80\% solved\n";
                 if (i == static_cast<int>(static_cast<double>(this->N)*0.9)-1) std::cout << "90\% solved\n";
-                if (i == static_cast<int>(static_cast<double>(this->N)*1)-1) std::cout << "100\% solved\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*1)-1) std::cout << "100\% solved\n\n";
             }
             std::cout << "status: solved successfully\n\n";
         }
@@ -91,7 +92,7 @@ class Solver
                 "\nmod. interspace\t" << this->L <<
                 "\nstep of count\t"<< this->h << std::endl << std::endl;
         }
-        void write()
+        void write_data()
         {
             std::cout << "collecting files\n";
             std::ofstream out(this->file);
@@ -104,6 +105,16 @@ class Solver
                     this->w << ',' <<
                     this->L << ',' <<
                     this->h << "\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.1)-1) std::cout << "10\% written\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.2)-1) std::cout << "20\% written\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.3)-1) std::cout << "30\% written\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.4)-1) std::cout << "40\% written\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.5)-1) std::cout << "50\% written\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.6)-1) std::cout << "60\% written\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.7)-1) std::cout << "70\% written\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.8)-1) std::cout << "80\% written\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*0.9)-1) std::cout << "90\% written\n";
+                if (i == static_cast<int>(static_cast<double>(this->N)*1)-1) std::cout << "100\% written\n\n";
             }
             out.close();
             std::cout << "data has been written to " + this->file << std::endl << std::endl;
@@ -127,7 +138,6 @@ int main()
 
     std::cout << "Entries number: " << config["entries"].size() << std::endl << std::endl;
 
-
     for (unsigned i = 0; i < config["entries"].size(); ++i)
     { // w(w), x0(x0), v0(v0), h(h), L(L), model(model)
         Solvers.push_back( Solver {
@@ -137,13 +147,18 @@ int main()
             config["entries"][i]["modeling interspace"],
             config["entries"][i]["step of modeling"],
             config["entries"][i]["model"],
-            config["file names"][i]["name"]
+            config["entries"][i]["file name"]
         });
     }
     
-    for (unsigned i = 0; i < Solvers.size(); ++i) {Solvers[i].print(); Solvers[i].solve();}
-    for (unsigned i = 0; i < Solvers.size(); ++i) Solvers[i].write();
-    
+    for (unsigned i = 0; i < Solvers.size(); ++i) 
+    {
+        Solvers[i].print();
+        Solvers[i].solve();
+        Solvers[i].write_data();
+        Solvers[i].clear();
+    }
+
     std::cout << "end of modeling";
 
     return 0;

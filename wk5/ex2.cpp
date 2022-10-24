@@ -7,27 +7,34 @@
     it converges to 15.4037 in the 10^7 steps
 */
 
-int main()
+int main(int argc, char* argv[])
 {
+    int n = 24, g = 1;
+    if (argc > 1) n = std::stoi(argv[1]);
+    if (argc > 2) g = std::stoi(argv[2]);
+    
     float d = 0;
-    unsigned n = 10;
     bool f = true;
-    std::string s = "\t\t";
-    for (n = 10; n <= 1e8 && f; n *= 10)
+
+    d = 0.;
+    if (g == 1)
     {
-        d = 0.;
-        for (unsigned i = 1; i <= n && f; ++i)
+        for (unsigned i = 1; i <= n; ++i)
         {
             d = d + 1. / static_cast<float>(i);
-            //std::cout << 1. / static_cast<double>(i) << std::endl;
-            if (1. / static_cast<float>(i) <= FLT_MIN)
-            {
-                std::cout << "on " << i << " iteration step became too small\n";
-                f = false;
-            }
         }
-        if (n == 1e7) s = "\t";
-        std::cout << "for n = " << n << s << " result is " <<  d << std::endl;
+        std::cout << d;
+        return 0;
     }
-
+    if (g == -1)
+    {
+        for (unsigned i = n; i >= 1; --i)
+        {
+            d = d + 1. / static_cast<float>(i);
+        }
+        std::cout << d;
+        return 0;
+    }
+    std::cout << "wrong parameter\n";
+    return 0;
 }

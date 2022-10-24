@@ -21,23 +21,30 @@ void int_tranc(float x, long long int N)
     bool f = true;
     std::string s = "\t";
 
+
     d1 = func(0);
     for (unsigned i = 1; i <= N && f; ++i)
     {
         d2 = func(i * h);
         st = 0.5 * h * (d1 + d2);
         d += st;
-        if (st <= FLT_MIN)
+        /*if (st <= FLT_MIN)
         {
             std::cout << "on " << i << " iteration step became too small\n";
             f = false;
-        }
+        }*/
         d1 = d2;
     }
-    std::cout << std::scientific << "for n = " << N << s << "x = " << x << s << " result is " <<  d << std::endl;
+    std::cout << d;
+    //std::cout << std::scientific << "for n = " << N << s << "x = " << x << s << " result is " <<  d << std::endl;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-    int_tranc(100, 100);
+    int n = 32;
+    float a = 8;
+    if (argc > 1) a = std::stof(argv[1]);
+    if (argc > 2) n = std::stoi(argv[2]);
+
+    int_tranc(a, n);
 }

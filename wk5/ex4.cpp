@@ -22,28 +22,31 @@ float fact(long long int N)
 
 void sin_mc(float x, long long int N)
 {
-    float d = 0, fc;
+    float d = x, st = x;
     bool f = true;
-    std::string s = "\t";
-    for (unsigned i = 0; i <= N && f; ++i)
+    for (unsigned i = 1; i <= N && f; ++i)
     {
-        fc = pow(x, 2 * i + 1) / fact(2 * i + 1);
-        if (i % 2 == 0) d += fc;
-        if (i % 2 == 1) d -= fc;
-        if (fc <= FLT_MIN)
-        {
-            //sstd::cout << "on " << i << " iteration step became too small\n";
-            f = false;
-        }
+        st *= -x * x / ((static_cast<float>(i)*2)*(static_cast<float>(i)*2+1));
+        d += st;
+        //if (st <= FLT_MIN)
+        //{
+        //    //sstd::cout << "on " << i << " iteration step became too small\n";
+        //    f = false;
+        //}
+        //std::cout << d << std::endl;
     }
-    if (N == 1e7) s = "\t";
-    std::cout << std::scientific << "for n = " << N << s << "x = " << x << s << " result is " <<  d << std::endl;
+    std::cout << d;
+    //if (N == 1e7) s = "\t";
+    //std::cout << std::scientific << "for n = " << N << s << "x = " << x << s << " result is " <<  d << std::endl;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-    for (int i = -9; i <= 9; ++i)
-    {
-        sin_mc(3.14*static_cast<float>(i), 17);
-    }
+    int n = 17, g = 1;
+    float alpha = 1.;
+    if (argc > 1) alpha = std::stof(argv[1]);
+    if (argc > 2) n = std::stoi(argv[2]);
+    if (argc > 3) g = std::stoi(argv[3]);
+
+    sin_mc(alpha, n);
 }

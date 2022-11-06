@@ -29,6 +29,7 @@ class physical_pendulum
     }
     physical_pendulum operator+(physical_pendulum other)
     {
+        assert(par==other.par);
         return physical_pendulum(phi+other.phi, w+other.w, par);
     }
     physical_pendulum operator*(double d)
@@ -57,11 +58,9 @@ class solver
 {
     private:
     std::vector<T> data;
-    //double L;
     public:
 
     solver () {}
-    //solver(T init_state, double L): L(L) {data.push_back(init_state);}
     T& operator[](size_t i)
     {
         assert(i >= 0 && i < data.size());
@@ -82,6 +81,7 @@ class solver
     void write(std::string file)
     {
         std::ofstream out(file, std::ios::binary);
+        assert(out.good());
         for (size_t i = 0; i < data.size(); ++i)
             out.write((char*)&data[i], sizeof(T));
         out.close();
@@ -89,13 +89,19 @@ class solver
     }
 };
 
-int main()
+int main(int argc, char* argv[])
 {
-    double par=1;
-    physical_pendulum v(M_PI-0.01,0,1);
+    double x0 = M_PI_4, v0 = 0, par = 1, L = 10, dx = 0.01;
+    if (argc > 1) x0  = std::stod(argv[1]);
+    if (argc > 2) v0  = std::stod(argv[2]);
+    if (argc > 3) par = std::stod(argv[3]);
+    if (argc > 4) L   = std::stod(argv[4]);
+    if (argc > 5) dx  = std::stod(argv[5]);
+
+    physical_pendulum v(x0,v0,par);
     solver<physical_pendulum, generic_euler<physical_pendulum> > s;
-    s.solve(v, 100, 0.001);
-    s.write("test.binary");
+    s.solve(v, L, dx);
+    s.write("modeled_data.binary");
     s.clear();
     return 0;
 }

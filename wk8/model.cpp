@@ -141,12 +141,12 @@ int main(int argc, char* argv[])
     }
     if (type == "heun")
     {
-        s.solve<generic_heun <physical_pendulum>> (v, L, dx);
+        s.solve<generic_heun<physical_pendulum>> (v, L, dx);
         tp = true;
     }
     if (type == "rk")
     {
-        s.solve<generic_rk   <physical_pendulum>> (v, L, dx);
+        s.solve<generic_rk<physical_pendulum>> (v, L, dx);
         tp = true;
     }
     if (!tp)

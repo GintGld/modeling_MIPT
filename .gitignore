@@ -1,0 +1,8 @@
+*.txt
+*.binary
+.vscode
+*.exe
+*.png
+*.json
+*.pyc
+*.bin

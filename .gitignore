@@ -1,9 +1,10 @@
 *.txt
 *.binary
-.vscode/*
+.vscode
 *.exe
 *.png
 *.json
 *.pyc
 *.bin
 *.o
+.ipynb_checkpoints

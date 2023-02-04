@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cassert>
 
+#define ValType double
 #include "json.hpp"
 #include "solver.h"
 

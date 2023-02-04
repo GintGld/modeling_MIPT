@@ -12,8 +12,8 @@ history_len = 500
 
 config = {
     'init' : {
-        'q1' : -np.pi/4,
-        'q2' : 0,
+        'q1' : np.pi/4,
+        'q2' : np.pi/4,
         'v1' : 0,
         'v2' : 0
     },
@@ -26,8 +26,8 @@ config = {
     },
     'modeling' : {
         'time' : 50,
-        "dt": .01,
-        "steps" :50
+        "dt" : .01,
+        "steps" : 50
     }
 }
 
@@ -146,6 +146,6 @@ def animate(i):
 
 ani = FuncAnimation(fig, animate,
     frames=np.arange(0, int(config['modeling']['time'] / config['modeling']['dt'])),
-    blit=True, interval=50)#config['modeling']['dt'] * 1000)
+    blit=True, interval= int(.1 / config['modeling']['dt']))
 
 plt.show()

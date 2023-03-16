@@ -1,0 +1,17 @@
+{
+    "types": [
+        {
+            "name" : "p1",
+            "mass" : 1,
+            "radius" : 0.5
+        },
+        {
+            "name" : "p2",
+            "mass" : 2,
+            "radius" : 0.5
+        }
+    ],
+    "sizes" : [10, 40],
+    "border" : 100,
+    "max speed" : 5
+}

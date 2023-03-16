@@ -9,3 +9,6 @@
 *.o
 .ipynb_checkpoints
 tmp
+*.log
+
+!*example.json

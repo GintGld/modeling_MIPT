@@ -10,5 +10,6 @@
 .ipynb_checkpoints
 tmp
 *.log
+*.csv
 
 !*example.json

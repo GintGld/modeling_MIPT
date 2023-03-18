@@ -1,17 +1,24 @@
 {
     "types": [
         {
-            "name" : "p1",
+            "id" : 1,
             "mass" : 1,
-            "radius" : 0.5
-        },
-        {
-            "name" : "p2",
-            "mass" : 2,
             "radius" : 0.5
         }
     ],
-    "sizes" : [10, 40],
-    "border" : 100,
-    "max speed" : 5
+    "particles" : [
+        {
+            "x" : 5,
+            "xdot" : 5,
+            "type id" : 1
+        },
+        {
+            "x" : 15,
+            "xdot" : -5,
+            "type id" : 1
+        }
+    ],
+    "border" : 20,
+    "time step" : 0.01,
+    "time" : 10
 }

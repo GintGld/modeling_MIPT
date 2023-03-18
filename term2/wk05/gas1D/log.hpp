@@ -44,17 +44,12 @@ public:
 
     bool good() {return out_stream.good();}
 
+    const std::string& get_filename() {return filename;}
+
     template<class T>
     _message_log& operator <<(const T message) {
         if (opened)
             out_stream << message;
-        else
-            warning_message_for_not_open_stream();
         return *this;
-    }
-
-    void warning_message_for_not_open_stream() {
-        std::cout << "Warning: you are trying to write a log message, but you didn't open a stream.\n"
-            "Run _message_log::open() to enable logging\n";
     }
 };

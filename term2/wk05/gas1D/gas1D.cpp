@@ -96,6 +96,10 @@ void gas1D::browse_main_json_members() {
 
     log_out << "Border setted\n";
 
+    if (config["time step"] <= 0) {
+        log_out << "Error: time step is zero or negative\n";
+        throw std::runtime_error("time step is zero or negative");
+    }
     time_step = config["time step"];
 
     log_out << "Time step setted\n";
@@ -181,16 +185,34 @@ void gas1D::generate_particles() {
     log_out << "Particles generated\n\n";
 }
 
-void gas1D::simulate(MF time) {
-    log_out << "Start simulating.\n" << "Time:\t\t\t\t" << time << "\n"
-            << "Number of steps:\t" << int(time / time_step) << "\n"
+void gas1D::simulate(MF m_time) {
+    log_out << "Start simulating.\n" << "Time:\t\t\t\t" << m_time << "\n"
+            << "Number of steps:\t" << int(abs(m_time) / time_step) << "\n"
             << "Time step:\t\t\t" << time_step << "\n\n";
     
-    for (unsigned long long i = 0; i * time_step < time; ++i)
-        make_step(i + 1);
+    if (m_time >= 0) {
+        for (unsigned long long i = 0; i * time_step < m_time; ++i)
+            make_step(i + 1);
+    } else { // m_time < 0
+        for (unsigned long long i = 0; i * time_step > m_time; --i)
+            make_step(1 - i);
+    }
 
     log_out << "\n" << "Finish simulation\n"
             << block_delimiter;
+}
+
+void gas1D::simulate() {
+    /*log_out << "Start simulating.\n" << "Time:\t\t\t\t" << time << "\n"
+            << "Number of steps:\t" << int(abs(time) / time_step) << "\n"
+            << "Time step:\t\t\t" << time_step << "\n\n";
+
+    for (unsigned long long i = 0; i * time_step < abs(time); ++i)
+        make_step(i + 1);
+
+    log_out << "\n" << "Finish simulation\n"
+            << block_delimiter;*/
+    simulate(time);
 }
 
 void gas1D::make_step(int step_num) {
@@ -209,27 +231,61 @@ void gas1D::make_step(int step_num) {
 }
 
 void gas1D::check_collisions(int step_num) {
-    for (unsigned i = 0; i < Particle_number; ++i) {
-        for (unsigned j = i + 1; j < Particle_number; ++j) {
+    for (unsigned i = 0; i < Particle_number - 1; ++i) {
+        /*for (unsigned j = i + 1; j < Particle_number; ++j) {
             if (abs(Particles[i].x - Particles[j].x) < Particles[i].radius + Particles[j].radius) {
                 collision(Particles[i], Particles[j]);
                 log_out << "Collision: " << i + 1 << ", " << j + 1 << " at " << step_num << " step\n";
             }
+        }*/
+        if (abs(Particles[i].x - Particles[i + 1].x) < Particles[i].radius + Particles[i + 1].radius) {
+            collision(Particles[i], Particles[i + 1]);
+            log_out << "Collision: " << i + 1 << ", " << i + 2 << " at " << step_num << " step\n";
         }
     }
 }
 
 void gas1D::reflection(int step_num) {
-    for (unsigned i = 0; i < Particle_number; ++i) {
-        if (Particles[i].x < 0 && Particles[i].xdot < 0) {
+    /*for (unsigned i = 0; i < Particle_number; ++i) {
+        if (Particles[i].x < Particles[i].radius && Particles[i].xdot < 0) {
             Particles[i].xdot *= -1;
             log_out << "Left reflection: " << i + 1 << " at " << step_num << " step\n";
         }
-        if (Particles[i].x > border && Particles[i].xdot > 0) {
+        if (Particles[i].x > border - Particles[i].radius && Particles[i].xdot > 0) {
             Particles[i].xdot *= -1;
             log_out << "Right reflection: " << i + 1 << " at " << step_num << " step\n";
         }
+    }*/
+    if (Particles[0].x < Particles[0].radius && Particles[0].xdot < 0) {
+        Particles[0].xdot *= -1;
+        log_out << "Left reflection: " << 1 << " at " << step_num << " step\n";
     }
+    if (Particles.back().x > border - Particles.back().radius && Particles.back().xdot > 0) {
+        Particles.back().xdot *= -1;
+        log_out << "Right reflection: " << Particle_number << " at " << step_num << " step\n";
+    }
+}
+
+void gas1D::make_step_exact(int step_num) {
+    /*
+        Место для реализации умного счета 
+        отражений и коллизий
+
+        Подумать, что делать, если за один шаг
+        получится более одного столкновения
+        для одной и той же частицы
+
+        Дробить dt тупо, возмонжо скидывать шаг 
+        на наивный make_step
+    */
+}
+
+void gas1D::simulate_exact(MF time) {
+
+}
+
+void gas1D::simulate_exact() {
+    simulate_exact(time);
 }
 
 void gas1D::write(const std::string& filename, bool binary) {

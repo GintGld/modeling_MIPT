@@ -49,14 +49,6 @@ private:
     std::vector<std::vector<MF> > history_x, history_xdot;
     std::vector<MF> history_x_tmp, history_xdot_tmp;
 
-/*public:
-    static int write;
-    static int log;
-    static int default_f;
-    static std::vector<
-    std::tuple<std::string, int>
-    > available_flags;*/
-
 public:
     gas1D(): Particles(0) {open_log();}
     gas1D(const std::string&);
@@ -78,33 +70,20 @@ public:
     std::vector<particle1D>::iterator end() {return Particles.end();}
     const particle1D& operator[](int i) {return Particles[i];}
 
-    void make_step(int = 0);
-    void check_collisions(int = 0);
-    void reflection(int = 0);
+    void make_step(int = 1);
+    void check_collisions(int = 1);
+    void reflection(int = 1);
     void simulate(MF);
+    void simulate();
+
+    // Use more accurate counting may be slower
+    void make_step_exact(int = 1);
+    void simulate_exact(MF);
+    void simulate_exact();
 
     void write(const std::string& = "output", bool = true);
-
-    // Crutch, static doesnot work
-    //const std::string block_delimiter = 
-    //    "******************************";
 };
 
 void assert_elements(json&, std::initializer_list<std::string>);
 
 void collision(particle1D& , particle1D&);
-
-// Define static variables
-/*int gas1D::write = 1<<0;
-int gas1D::log = 1<<1;
-int gas1D::default_f = gas1D::write | gas1D::log;
-*/
-
-// List of flags with their names
-/*std::vector<
-std::tuple<std::string, int>
-> gas1D::available_flags{
-    {"write", gas1D::write},
-    {"log", gas1D::log},
-    {"default", gas1D::default_f}
-};*/

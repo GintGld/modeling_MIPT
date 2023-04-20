@@ -2,8 +2,7 @@
     "types": [
         {
             "id" : 1,
-            "mass" : 1,
-            "radius" : 0.5
+            "mass" : 1
         }
     ],
     "particles" : [
@@ -19,6 +18,5 @@
         }
     ],
     "border" : 20,
-    "time step" : 0.01,
     "time" : 10
 }

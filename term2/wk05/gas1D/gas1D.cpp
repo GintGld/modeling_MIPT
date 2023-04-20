@@ -4,7 +4,26 @@
 #include "gas1D.hpp"
 
 // crutch, any other did not work
-#define block_delimiter "******************************\n";
+#define block_delimiter "******************************\n"
+
+collision::collision(unsigned id, MF t, MF x, std::string type):
+time_step(t), coord(x), type(type) {
+    if (type == "left-reflection") {
+        first = -1;
+        second = 0;
+    } else if (type == "right-reflection") {
+        first = id;
+        second = id + 1;
+    } else if (type == "collision") {
+        first = id;
+        second = id + 1;
+    } else {
+        type = "unknown";
+        first = -1000;
+        second = -1000;
+        time_step = -1000;
+    }
+}
 
 gas1D::gas1D(const std::string& config_path) {
     open_log();
@@ -54,6 +73,9 @@ void gas1D::init(const std::string& config_path) {
 }
 
 void gas1D::read_json(const std::string& config_path) {
+    /*
+        Parsing file
+    */
     std::ifstream input_stream(config_path);
 
     // Check if file exists and connection is good
@@ -80,8 +102,12 @@ void gas1D::read_json(const std::string& config_path) {
 }
 
 void gas1D::browse_main_json_members() {
+    /*
+        Check the needed structure of json file
+    */
+
     try {
-        assert_elements(config, {"types", "particles", "border", "time step"});
+        assert_elements(config, {"types", "particles", "border"});
     } catch(std::runtime_error& e) {throw e;}
 
     try {
@@ -96,21 +122,17 @@ void gas1D::browse_main_json_members() {
 
     log_out << "Border setted\n";
 
-    if (config["time step"] <= 0) {
-        log_out << "Error: time step is zero or negative\n";
-        throw std::runtime_error("time step is zero or negative");
-    }
-    time_step = config["time step"];
-
-    log_out << "Time step setted\n";
-
     log_out << "\n";
 }
 
 void gas1D::generate_types() {
+    /*
+        Generating particle types
+    */
+
     log_out << "Generating types\n";
 
-    // Check indices for repeating and throw error if yes
+    // Check indices for repeating and throw error if it is
     std::vector<unsigned> indices_check;
     for (long long unsigned i = 0; i < config["types"].size(); ++i) {
         try {
@@ -128,13 +150,12 @@ void gas1D::generate_types() {
     // Fulfill `Types` vector
     for (long long unsigned i = 0; i < config["types"].size(); ++i) {
         try {
-            assert_elements(config["types"][i], {"mass", "radius"});
+            assert_elements(config["types"][i], {"mass"});
         } catch (std::runtime_error& e) {throw e;}
         try {
             Types.push_back(
                 particleType(
                     config["types"][i]["id"],
-                    config["types"][i]["radius"],
                     config["types"][i]["mass"]
                 )
             );
@@ -148,6 +169,10 @@ void gas1D::generate_types() {
 }
 
 void gas1D::generate_particles() {
+    /*
+        Generating particles
+    */
+
     log_out << "Generating particles\n";
 
     Particle_number = config["particles"].size();
@@ -186,149 +211,185 @@ void gas1D::generate_particles() {
 }
 
 void gas1D::simulate(MF m_time) {
-    log_out << "Start simulating.\n" << "Time:\t\t\t\t" << m_time << "\n"
-            << "Number of steps:\t" << int(abs(m_time) / time_step) << "\n"
-            << "Time step:\t\t\t" << time_step << "\n\n";
-    
-    if (m_time >= 0) {
-        for (unsigned long long i = 0; i * time_step < m_time; ++i)
-            make_step(i + 1);
-    } else { // m_time < 0
-        for (unsigned long long i = 0; i * time_step > m_time; --i)
-            make_step(1 - i);
-    }
+    /*
+        Simple modeling loop
+        with saving coordinates and 
+        velocities at every step
+    */
 
+    log_out << "Start simulating.\n" << "Time:\t\t\t\t" << m_time << "\n";
+    
+    if (m_time < 0)
+        return;
+
+    current_time = 0;
+    time = m_time;
+
+    while(current_time < m_time){
+        save_state();
+        make_step();
+    }
+    save_state();
+    
     log_out << "\n" << "Finish simulation\n"
             << block_delimiter;
 }
 
 void gas1D::simulate() {
-    /*log_out << "Start simulating.\n" << "Time:\t\t\t\t" << time << "\n"
-            << "Number of steps:\t" << int(abs(time) / time_step) << "\n"
-            << "Time step:\t\t\t" << time_step << "\n\n";
-
-    for (unsigned long long i = 0; i * time_step < abs(time); ++i)
-        make_step(i + 1);
-
-    log_out << "\n" << "Finish simulation\n"
-            << block_delimiter;*/
     simulate(time);
 }
 
-void gas1D::make_step(int step_num) {
-    check_collisions(step_num);
-    reflection(step_num);
+void gas1D::make_step() {
+    /*
+        Making a step in model,
+        searching the neaerest event
+        and make step with those time
+    */
 
-    for (particle1D& p : Particles) {
+    // define default values
+    subtime = time - current_time;
+    nearest_collision = collision(-10, -10, -10, "unknown");
+
+    // searching for nearest event
+    check_collisions();
+    check_reflections();
+
+    // handle the nearest event or 
+    // just move particle if there is no any
+    if (nearest_collision.type == "collision") {               // collision
+        unsigned id_1 = nearest_collision.first,
+                id_2 = nearest_collision.second;
+        Particles[id_1].x = nearest_collision.coord;
+        Particles[id_2].x = nearest_collision.coord;
+        handle_collision(Particles[id_1], Particles[id_2]);
+    } else if (nearest_collision.type == "left-reflection") {  // left reflection
+            Particles.front().x = 0;
+            Particles.front().xdot *= -1;
+    } else if (nearest_collision.type == "right-reflection") { // right reflection
+            Particles.back().x = border;
+            Particles.back().xdot *= -1;
+    }
+
+    // move other particles
+    for (int i = 0; i < Particle_number; ++i) {
+        if (i != nearest_collision.first && i != nearest_collision.second)
+            Particles[i].x += subtime * Particles[i].xdot;
+    }
+
+    // make step in time
+    current_time += subtime;
+
+    // add to history (with absolute time)
+    nearest_collision.time_step = current_time;
+    collision_history.push_back(nearest_collision);
+}
+
+void gas1D::check_collisions() {
+    /*
+        Going through particles' collisions
+    */
+    for (unsigned i = 0; i < Particle_number - 1; ++i) {
+        MF  x1 = Particles[i].x, x2 = Particles[i + 1].x,
+            v1 = Particles[i].xdot, v2 = Particles[i + 1].xdot;
+
+        if (v1 >= 0 && v2 <= 0 && (v1 != 0 || v2 != 0)) { // check dimensions
+            if (x2 - x1 < (v1 - v2) * subtime) { // chech if this collision will be earlier than others
+                subtime = (x2 - x1) / (v1 - v2); // update time step
+                nearest_collision = collision(   // update target collision
+                    i, 
+                    subtime, 
+                    (x2 * v1 - x1 * v2) / (v1 - v2),
+                    "collision"
+                );
+            }
+        }
+    }
+}
+
+void gas1D::check_reflections() {
+    /*
+        Check left and right reflections
+    */
+
+    if (Particles.front().xdot < 0) { // left reflection
+        if (Particles.front().x < - Particles.front().xdot * subtime) {
+            subtime = - Particles.front().x / Particles.front().xdot;
+            nearest_collision = collision(
+                0, 
+                subtime,
+                0,
+                "left-reflection"
+            );
+        }
+    }
+    if (Particles.back().xdot > 0) { // right reflection
+        if (border - Particles.back().x < Particles.back().xdot * subtime) {
+            subtime = (border - Particles.back().x) / Particles.back().xdot;
+            nearest_collision = collision(
+                Particle_number - 1, 
+                subtime,
+                border,
+                "right-reflection"
+            );
+        }
+    }
+}
+
+void gas1D::save_state() {
+    /*
+        Saving state of system at given time
+        if coordinates have not changed since
+        previous iteration, updates velocities
+    */
+
+    for(const particle1D& p : Particles) {
         history_x_tmp.push_back(p.x);
         history_xdot_tmp.push_back(p.xdot);
-        p.x += p.xdot * time_step;
     }
-    history_x.push_back(history_x_tmp);
-    history_xdot.push_back(history_xdot_tmp);
+    if (history_x.size() > 0 && history_x_tmp == history_x.back()) {
+        history_xdot.back() = history_xdot_tmp;
+    } else {
+        history_x.push_back(history_x_tmp);
+        history_xdot.push_back(history_xdot_tmp);
+        history_time.push_back(current_time);
+    }
     history_x_tmp.clear();
     history_xdot_tmp.clear();
 }
 
-void gas1D::check_collisions(int step_num) {
-    for (unsigned i = 0; i < Particle_number - 1; ++i) {
-        /*for (unsigned j = i + 1; j < Particle_number; ++j) {
-            if (abs(Particles[i].x - Particles[j].x) < Particles[i].radius + Particles[j].radius) {
-                collision(Particles[i], Particles[j]);
-                log_out << "Collision: " << i + 1 << ", " << j + 1 << " at " << step_num << " step\n";
-            }
-        }*/
-        if (abs(Particles[i].x - Particles[i + 1].x) < Particles[i].radius + Particles[i + 1].radius) {
-            collision(Particles[i], Particles[i + 1]);
-            log_out << "Collision: " << i + 1 << ", " << i + 2 << " at " << step_num << " step\n";
-        }
-    }
-}
-
-void gas1D::reflection(int step_num) {
-    /*for (unsigned i = 0; i < Particle_number; ++i) {
-        if (Particles[i].x < Particles[i].radius && Particles[i].xdot < 0) {
-            Particles[i].xdot *= -1;
-            log_out << "Left reflection: " << i + 1 << " at " << step_num << " step\n";
-        }
-        if (Particles[i].x > border - Particles[i].radius && Particles[i].xdot > 0) {
-            Particles[i].xdot *= -1;
-            log_out << "Right reflection: " << i + 1 << " at " << step_num << " step\n";
-        }
-    }*/
-    if (Particles[0].x < Particles[0].radius && Particles[0].xdot < 0) {
-        Particles[0].xdot *= -1;
-        log_out << "Left reflection: " << 1 << " at " << step_num << " step\n";
-    }
-    if (Particles.back().x > border - Particles.back().radius && Particles.back().xdot > 0) {
-        Particles.back().xdot *= -1;
-        log_out << "Right reflection: " << Particle_number << " at " << step_num << " step\n";
-    }
-}
-
-void gas1D::make_step_exact(int step_num) {
+void gas1D::write_coordinates(const std::string& filename) {
     /*
-        Место для реализации умного счета 
-        отражений и коллизий
-
-        Подумать, что делать, если за один шаг
-        получится более одного столкновения
-        для одной и той же частицы
-
-        Дробить dt тупо, возмонжо скидывать шаг 
-        на наивный make_step
+        writes save data in .csv format
+        the structure is:
+            `time,x1,x2,...,xn,xdot1,xdot2,...,xdotn`
+        where n - number of particles
     */
-}
 
-void gas1D::simulate_exact(MF time) {
-
-}
-
-void gas1D::simulate_exact() {
-    simulate_exact(time);
-}
-
-void gas1D::write(const std::string& filename, bool binary) {
     std::ofstream out;
-    std::string postfix;
-    if (binary) {
-        postfix = ".data";
-        out.open(filename+postfix, std::ios::binary);
-    }
-    else {
-        postfix = ".csv";
-        out.open(filename+postfix);
-    }
+    std::string postfix = ".csv";
+    
+    out.open(filename+postfix);
 
     if (!out.good()) {
         log_out << "Cannot open stream to " << filename << postfix << " file\n";
         return;
     }
 
-    if (binary) {
-        for (unsigned long long i = 0; i < history_x.size(); ++i) {
-            //for (unsigned j = 0; j < Particle_number; ++j)
-            out.write((char*)(&history_x), sizeof(MF) * Particle_number);
-            out.write((char*)(&history_xdot), sizeof(MF) * Particle_number);
-        }
-    }
-    else {
-        // header
-        for (unsigned j = 0; j < Particle_number; ++j)
-            out << "x" << j + 1 << ",";
-        for (unsigned j = 0; j < Particle_number - 1; ++j)
-            out << "xdot" << j + 1 << ",";
-        out << "xdot" << Particle_number << "\n";
-        
+    // header
+    out << "time,";
+    for (unsigned i = 0; i < Particle_number; ++i)
+        out << "x" << i << ",";
+    for (unsigned i = 0; i < Particle_number - 1; ++i)
+        out << "xdot" << i << ",";
+    out << "xdot" << Particle_number - 1 << std::endl;
 
-        // data
-        for (unsigned long long i = 0; i < history_x.size(); ++i) {
-            for (unsigned j = 0; j < Particle_number; ++j)
-                out << history_x[i][j] << ",";
-            for (unsigned j = 0; j < Particle_number - 1; ++j)
-                out << history_xdot[i][j] << ",";
-            out << history_xdot[i].back() << "\n";
-        }
+    for (unsigned i = 0; i < history_time.size(); ++i) {
+        out << history_time[i] << ',';
+        for (unsigned j = 0; j < history_x[i].size(); ++j)
+            out << history_x[i][j] << ',';
+        for (unsigned j = 0; j < history_x[i].size() - 1; ++j)
+            out << history_xdot[i][j] << ',';
+        out << history_xdot[i][Particle_number - 1] << std::endl;
     }
 
     out.close();
@@ -337,7 +398,49 @@ void gas1D::write(const std::string& filename, bool binary) {
             << block_delimiter;
 }
 
-void collision(particle1D& p1, particle1D& p2) {
+void gas1D::write_collisions(const std::string& filename) {
+    /*
+        writes save data in .csv format
+        the structure is:
+            `time,coll`
+        where `coll` - number of collisions happened at `time`
+    */
+
+    std::ofstream out;
+    std::string postfix = ".csv";
+    
+    if (collision_history.size() == 0) {
+        log_out << "No collisions to write\n.";
+        return;
+    }
+    
+    out.open(filename+postfix);
+
+    if (!out.good()) {
+        log_out << "Cannot open stream to " << filename << postfix << " file\n";
+        return;
+    }
+
+    out << "time,coll\n";
+    int coll_counter;
+    for (const MF& t: history_time) {
+        coll_counter = 0;
+        for (const collision& coll : collision_history)
+            coll_counter += (coll.time_step == t && coll.type != "unknown");
+        if (coll_counter != 0)
+            out << t << ',' << coll_counter << "\n";
+    }
+
+    out.close();
+
+    log_out << "Collisions written to " << filename << postfix << "\n"
+            << block_delimiter;
+}
+
+void handle_collision(particle1D& p1, particle1D& p2) {
+    /*
+        calculate the kinematics of elastic collision
+    */
     MF m1 = p1.mass, m2 = p2.mass, v1 = p1.xdot, v2 = p2.xdot;
     p1.xdot = (v1 * (m1 - m2) + v2 * 2 * m2) / (m1 + m2);
     p2.xdot = (2 * m1 * v1 + (m2 - m1) * v2) / (m1 + m2);
@@ -345,6 +448,9 @@ void collision(particle1D& p1, particle1D& p2) {
 }
 
 void assert_elements(json& j, std::initializer_list<std::string> names) {
+    /*
+        simple check if given elements exist in json
+    */
     for (const std::string& name: names)
         if (j[name] == nullptr) {
             throw std::runtime_error("Did not find "+name+" in json file");

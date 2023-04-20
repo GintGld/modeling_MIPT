@@ -1,7 +1,7 @@
 #pragma once
 
+#include <string>
 #include <vector>
-#include <tuple>
 #include <initializer_list>
 
 #include "json.hpp"
@@ -17,11 +17,11 @@ using json = nlohmann::json;
 struct particleType {
 public:
     unsigned id;
-    MF radius, mass;
+    MF mass;
 
-    particleType(): id(0), radius(0), mass(0) {}
-    particleType(unsigned id, MF radius, MF mass):
-        id(id), radius(radius), mass(mass) {}
+    particleType(): id(0), mass(0) {}
+    particleType(unsigned id, MF mass):
+        id(id), mass(mass) {}
 };
 
 struct particle1D: public particleType{
@@ -29,6 +29,15 @@ struct particle1D: public particleType{
 
     particle1D(): particleType(), x(0), xdot() {}
     particle1D(particleType type, MF x = 0, MF xdot = 0): particleType(type), x(x), xdot(xdot) {}
+};
+
+struct collision {
+    int first, second;
+    MF time_step, coord;
+    std::string type; // "unknown", "left-reflection", "right-reflection"
+
+    collision(): first(-1), second(-1), time_step(-1), type("unknown") {}; // default constructor
+    collision(unsigned id, MF t, MF x, std::string type);
 };
 
 class gas1D {
@@ -39,7 +48,9 @@ private:
 
     MF border;
 
-    MF time_step, time;
+    MF time, current_time, subtime;
+    collision nearest_collision;
+    std::vector<collision> collision_history;
 
     json config;
     _message_log log_out;
@@ -47,7 +58,7 @@ private:
     int flags;
 
     std::vector<std::vector<MF> > history_x, history_xdot;
-    std::vector<MF> history_x_tmp, history_xdot_tmp;
+    std::vector<MF> history_x_tmp, history_xdot_tmp, history_time;
 
 public:
     gas1D(): Particles(0) {open_log();}
@@ -66,24 +77,24 @@ public:
     unsigned get_particle_number() {return Particle_number;}
     std::vector<particle1D>& get_particles() {return Particles;}
 
+    // iterable
     std::vector<particle1D>::iterator begin() {return Particles.begin();}
     std::vector<particle1D>::iterator end() {return Particles.end();}
     const particle1D& operator[](int i) {return Particles[i];}
 
-    void make_step(int = 1);
-    void check_collisions(int = 1);
-    void reflection(int = 1);
+    // modeling
+    void make_step();
+    void check_collisions();
+    void check_reflections();
     void simulate(MF);
     void simulate();
 
-    // Use more accurate counting may be slower
-    void make_step_exact(int = 1);
-    void simulate_exact(MF);
-    void simulate_exact();
-
-    void write(const std::string& = "output", bool = true);
+    // saving data
+    void save_state();
+    void write_coordinates(const std::string& = "coordinates");
+    void write_collisions(const std::string& = "collisions");
 };
 
 void assert_elements(json&, std::initializer_list<std::string>);
 
-void collision(particle1D& , particle1D&);
+void handle_collision(particle1D&, particle1D&);

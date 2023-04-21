@@ -6,7 +6,7 @@ using std::cout, std::endl;
 int main(int argc, char** argv)
 {
     // get config file
-    std::string file;
+    std::string file, prefix = "./";
     if (argc >= 2) {
         file = argv[1];
     } else {
@@ -20,8 +20,8 @@ int main(int argc, char** argv)
     g.simulate();
 
     // write data
-    g.write_coordinates();
-    g.write_collisions();
+    g.write_coordinates("tmp/coordinates");
+    g.write_collisions("tmp/collisions");
 
     return 0;
 }

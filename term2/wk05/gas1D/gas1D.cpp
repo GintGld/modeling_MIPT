@@ -1,5 +1,6 @@
 #include <iostream>
 #include <exception> // runtime_error
+#include <algorithm> // sort
 
 #include "gas1D.hpp"
 
@@ -208,6 +209,16 @@ void gas1D::generate_particles() {
     }
 
     log_out << "Particles generated\n\n";
+
+    std::sort(
+        Particles.begin(), 
+        Particles.end(), 
+        [](const particle1D& p1, const particle1D& p2) -> bool {
+            return p1.x <= p2.x;
+        }
+    );
+
+    log_out << "Particles sorted\n";
 }
 
 void gas1D::simulate(MF m_time) {

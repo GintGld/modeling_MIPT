@@ -217,10 +217,12 @@ void gas1D::simulate(MF m_time) {
         velocities at every step
     */
 
-    log_out << "Start simulating.\n" << "Time:\t\t\t\t" << m_time << "\n";
-    
-    if (m_time < 0)
+    if (m_time < 0) {
+        log_out << "Time value cannot be negative.\n";
         return;
+    }
+    
+    log_out << "Start simulating.\n" << "Time:\t\t\t\t" << m_time << "\n\n";
 
     current_time = 0;
     time = m_time;
@@ -292,7 +294,7 @@ void gas1D::check_collisions() {
         MF  x1 = Particles[i].x, x2 = Particles[i + 1].x,
             v1 = Particles[i].xdot, v2 = Particles[i + 1].xdot;
 
-        if (v1 >= 0 && v2 <= 0 && (v1 != 0 || v2 != 0)) { // check dimensions
+        if (!(v1 == 0 && v2 == 0)) { // check dimensions
             if (x2 - x1 < (v1 - v2) * subtime) { // chech if this collision will be earlier than others
                 subtime = (x2 - x1) / (v1 - v2); // update time step
                 nearest_collision = collision(   // update target collision

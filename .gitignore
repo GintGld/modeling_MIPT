@@ -11,6 +11,5 @@
 tmp
 *.log
 *.csv
-Makefile
 
 !*example.json

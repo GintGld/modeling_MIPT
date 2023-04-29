@@ -218,7 +218,7 @@ void gas1D::generate_particles() {
         }
     );
 
-    log_out << "Particles sorted\n";
+    log_out << "Particles sorted\n\n";
 }
 
 void gas1D::simulate(MF m_time) {
@@ -295,6 +295,12 @@ void gas1D::make_step() {
     // add to history (with absolute time)
     nearest_collision.time_step = current_time;
     collision_history.push_back(nearest_collision);
+
+    log_out << nearest_collision.type << ' '
+            << nearest_collision.first<< ' '
+            << nearest_collision.second<<' '
+            << nearest_collision.coord<< ' '
+            << nearest_collision.time_step<<"\n";
 }
 
 void gas1D::check_collisions() {

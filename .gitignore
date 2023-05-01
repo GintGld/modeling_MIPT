@@ -11,5 +11,9 @@
 tmp
 *.log
 *.csv
+build
+Makefile
 
+!CMakeLists.txt
+!term2/wk05/Makefile
 !*example.json

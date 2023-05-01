@@ -1,16 +1,13 @@
 #include "ray.h"
+#include "object.h"
 
 #include <vector>
-
-// ToDo: добавить проверку на зацикливание
-// например, поставить (изменяемое) ограничение
-// на количество итераций для одного луча
 
 class space {
 private:
     std::vector<object*> Objects;
     std::vector<ray> Rays, Rays_to_add;
-    std::vector<ray*> Rays_to_delete; // indeces
+    std::vector<ray*> Rays_to_delete;
 
     std::vector<std::vector<event>> history;
 
@@ -27,7 +24,7 @@ public:
     void add_ray(ray r) {Rays.push_back(r);}
 
     void delete_ray(ray&);
-    // + добавление нового луча
+    // ToDo добавление нового луча
     void update_rays();
 
     void make_step(ray&);

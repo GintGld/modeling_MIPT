@@ -1,10 +1,10 @@
 #include "space.h"
-#include "ray.h"
+#include "screen.h"
 
 #include <limits>
 #include <iostream>
 
-unsigned long long space::max_iterations = 10000;
+unsigned long long space::max_iterations = 100;
 
 space::space(MF border) {
     p1 = { border / 2,  border / 2};
@@ -47,13 +47,13 @@ void space::update_rays() {
 }
 
 void space::make_step(ray& r) {
-    MF min_dist, d_tmp;
+    MF min_dist = std::numeric_limits<MF>::infinity(), d_tmp;
     point p_inter;
-    int id;
+    int id = -1;
 
     // Поиск ближайшего столкновения
-    min_dist = std::numeric_limits<MF>::infinity();
-    id = -1;
+    /////min_dist = std::numeric_limits<MF>::infinity();
+    /////id = -1;
     for (int i = 0; i < Objects.size(); ++i) {
         p_inter = Objects[i]->find_intersection(r);
         d_tmp = distance(r.p, p_inter);

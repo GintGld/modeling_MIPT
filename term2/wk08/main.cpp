@@ -1,5 +1,4 @@
-#include "RayTracing/ray.h"
-#include "RayTracing/space.h"
+#include "RayTracing/RayTracing.h"
 
 #include <iostream>
 

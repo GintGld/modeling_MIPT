@@ -4,6 +4,8 @@
 
 #include "json.hpp"
 
+#define n_thread 6
+
 // g++ main.cpp -fopenmp -Wall -Wextra -O2 -g -o main_mp
 
 using json=nlohmann::json;
@@ -73,6 +75,7 @@ int main(int argc, char** argv) {
     }
 
     // initiate sigma matrix
+    #pragma omp parallel for num_threads(n_thread)
     for (int i = 0; i < Ny + 2; ++i) {
         for (int j = 0; j < Nx + 2; ++j) {
             // Последовательное соединение
@@ -87,16 +90,19 @@ int main(int argc, char** argv) {
     auto begin = std::chrono::steady_clock::now();
     for (int step = 0; step < Number_steps; ++step) {
         // update buffer
+        #pragma omp parallel for num_threads(n_thread)
         for (int i = 1; i <= Ny; ++i) {
             Net[i][0] = phi0;
             Net[i][Nx + 1] = phi1;
         }
+        #pragma omp parallel for num_threads(n_thread)
         for (int j = 1; j <= Nx; ++j) {
             Net[0][j] = Net[1][j];
             Net[Ny + 1][j] = Net[Ny][j];
         }
 
         // Calculate new values into Net_tmp
+        #pragma omp parallel for num_threads(n_thread)
         for (int i = 1; i <= Ny; ++i) {
             for (int j = 1; j <= Nx; ++j) {
                 // calculate effective sigmas
@@ -121,6 +127,7 @@ int main(int argc, char** argv) {
         }
 
         // Update Net
+        #pragma omp parallel for num_threads(n_thread)
         for (int i = 1; i <= Ny; ++i)
             for (int j = 1; j <= Nx; ++j)
                 Net[i][j] += Net_tmp[i][j];
